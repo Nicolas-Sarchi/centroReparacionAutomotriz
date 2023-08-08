@@ -94,20 +94,11 @@ internal class Program
                     } while (opcionOrden != 5);
                     break;
                 case 3:
-                    Console.Write("Ingrese el nro de Orden de Servicio que desea Facturar: ");
-                    int nroOrdenFacturar = int.Parse(Console.ReadLine());
-                    OrdenServicio ordenServicioFacturar = taller.BuscarOrden(nroOrdenFacturar);
+                    Factura factura = taller.GenerarFactura();
 
-                    if (ordenServicioFacturar != null)
-                    {
-                        ordenServicioFacturar.FacturarServicio(ordenServicioFacturar.NroOrden);
-                        Console.WriteLine("\n\nFactura generada.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Orden de servicio no encontrada.");
-                    }
+                    
                     Console.WriteLine("\nPresione una tecla para continuar...");
+
                     Console.ReadKey();
                     break;
 

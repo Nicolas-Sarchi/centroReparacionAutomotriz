@@ -52,36 +52,11 @@ public class OrdenServicio
 
     public void GenerarOrdenDeAprobacion(string empleadoId)
     {
-        List<ItemAprobacion> itemsAleatorios = GenerarItemsAleatorios();
-
-        // Asociar los ítems aleatorios a la orden de aprobación
         Empleado empleado = PersonalACargo.Find(empleado => empleado.id == empleadoId);
         OrdenAprobacion ordenAprobacion = new OrdenAprobacion(NroOrden, FechaOrden, empleado.id);
-        ordenAprobacion.ItemsAprobacion = itemsAleatorios;
-
-        // Agregar la orden de aprobación a la lista de órdenes de aprobación de la orden de servicio
         OrdenesAprobacion.Add(ordenAprobacion);
     }
 
-    public List<ItemAprobacion> GenerarItemsAleatorios()
-    {
-        List<ItemAprobacion> itemsAleatorios = new List<ItemAprobacion>();
-
-
-        ItemAprobacion item1 = new ItemAprobacion("01", "Pastillas de frenos", 50000, 2);
-        ItemAprobacion item2 = new ItemAprobacion("02", "Batería", 80000, 1);
-        ItemAprobacion item3 = new ItemAprobacion("03", "Aceite de motor", 25000, 3);
-        ItemAprobacion item4 = new ItemAprobacion("04", "Filtro de aire", 30000, 1);
-        ItemAprobacion item5 = new ItemAprobacion("05", "Líquido de frenos", 40000, 1);
-
-        itemsAleatorios.Add(item1);
-        itemsAleatorios.Add(item2);
-        itemsAleatorios.Add(item3);
-        itemsAleatorios.Add(item4);
-        itemsAleatorios.Add(item5);
-
-        return itemsAleatorios;
-    }
 
     public void MostrarOrdenesAprobacion()
     {
@@ -90,91 +65,46 @@ public class OrdenServicio
         {
             Console.WriteLine($"Nro Orden: {orden.NroOrden}\tFecha: {orden.Fecha}\nId Empleado: {orden.IdEmpleado}");
             Console.WriteLine("\n-------- Detalle de Aprobación --------\n");
-            foreach (var item in orden.ItemsAprobacion)
+            Console.Write("Desea añadir un detalle de aprobaciòn? S/N: ");
+            string opciondetalle = Console.ReadLine().ToUpper();
+            while (opciondetalle != "N")
             {
-                Console.Write($"Diagnostico: {item.Item}\tRepuesto: {item.Repuesto}\tValor Unitario: {item.ValorUnitario}\tCantidad: {item.Cantidad}\tValor Total: {item.ValorTotal}\tEstatus (A/R): ");
-                string estatus = Console.ReadLine();
-                if (estatus.ToUpper() != "A" && estatus.ToUpper() != "R")
+                
+                Console.Write("Ingrese el numero de item del repuesto:");
+                string itemN = Console.ReadLine();
+                Console.Write("Ingrese el nombre del repuesto:");
+                string repuesto = Console.ReadLine();
+                Console.Write("\nIngrese el valor unitario del repuesto:");
+                double valorU = double.Parse(Console.ReadLine());
+                Console.Write("\nIngrese la cantidad del repuesto:");
+                int cantidad = int.Parse(Console.ReadLine());
+                Console.Write("\nIngrese el estado del repuesto (A/R): ");
+                string estado = Console.ReadLine();
+                ItemAprobacion item = new ItemAprobacion(itemN, repuesto, valorU, cantidad);
+                orden.AgregarItemAprobacion(item);   
+                Console.Write("Desea añadir un detalle de aprobaciòn? S/N: ");
+                opciondetalle = Console.ReadLine().ToUpper();
+                if (estado.ToUpper() != "A" && estado.ToUpper() != "R")
                 {
-                    Console.WriteLine("Estatus no valido");
+                    Console.WriteLine("estado no valido");
                     return;
 
                 } else{
-                    if(estatus.ToUpper() == "A"){
+                    if(estado.ToUpper() == "A"){
                         item.Estatus = "Aprobado";
                     } else{
                         item.Estatus = "Rechazado";
                     }
                 }
+            } 
                 
-            }
         }
     }
 
-    public void FacturarServicio(int nroOrden)
-    {
-        OrdenAprobacion ordenAprobacion = BuscarOrden(nroOrden);
 
-        if (ordenAprobacion == null)
-        {
-            Console.WriteLine("Orden de Aprobacion no encontrada.");
-            return;
-        }
 
-        List<ItemAprobacion> repuestosAutorizados = ordenAprobacion.RepuestosAutorizados();
+    
 
-        decimal valorManoObra = CalcularValorManoObra(repuestosAutorizados);
-        decimal subtotal = CalcularSubtotal(repuestosAutorizados, valorManoObra);
-        decimal iva = CalcularIVA(subtotal);
-        decimal total = CalcularTotal(subtotal, iva);
-
-        MostrarFactura(nroOrden, repuestosAutorizados, valorManoObra, subtotal, iva, total);
-    }
-
-    private decimal CalcularValorManoObra(List<ItemAprobacion> repuestosAutorizados)
-    {
-        decimal valorManoObra = 0;
-        foreach (var repuesto in repuestosAutorizados)
-        {
-            valorManoObra += repuesto.ValorTotal * 0.10m;
-        }
-        return valorManoObra;
-    }
-
-    private decimal CalcularSubtotal(List<ItemAprobacion> repuestosAutorizados, decimal valorManoObra)
-    {
-        decimal subtotal = repuestosAutorizados.Sum(repuesto => repuesto.ValorTotal) + valorManoObra;
-        return subtotal;
-    }
-
-    private decimal CalcularIVA(decimal subtotal)
-    {
-        decimal iva = subtotal * 0.19m;
-        return iva;
-    }
-
-    private decimal CalcularTotal(decimal subtotal, decimal iva)
-    {
-        decimal total = subtotal + iva;
-        return total;
-    }
-
-    private void MostrarFactura(int nroOrden, List<ItemAprobacion> repuestosAutorizados, decimal valorManoObra, decimal subtotal, decimal iva, decimal total)
-    {
-        Console.WriteLine("\n--------- Factura ---------");
-        Console.WriteLine($"Nro Orden: {nroOrden}");
-        Console.WriteLine("\n--------- Detalle Factura ---------");
-        foreach (var repuesto in repuestosAutorizados)
-        {
-            Console.WriteLine($"Repuesto: {repuesto.Repuesto}\tCantidad: {repuesto.Cantidad}\tValor Unitario: {repuesto.ValorUnitario}\tValor Total: {repuesto.ValorTotal}");
-        }
-        Console.WriteLine($"Valor Mano de Obra: {valorManoObra}\tSubtotal: {subtotal}\tIVA 19%: {iva}\tTotal: {total}\n");
-    }
-
-    public OrdenAprobacion BuscarOrden(int NroOrden)
-    {
-        return OrdenesAprobacion.Find(o => o.NroOrden == NroOrden);
-    }
 
 }
 

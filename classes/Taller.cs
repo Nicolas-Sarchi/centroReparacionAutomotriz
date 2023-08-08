@@ -6,7 +6,6 @@ public class Taller
     public List<Vehiculo> vehiculos;
     public List<Empleado> empleados;
     public List<OrdenServicio> ordenesDeServicio;
-    public List<Factura> facturas;
     public int numeroOrdenActual;
     public int numeroFacturaActual;
  
@@ -16,7 +15,6 @@ public class Taller
         vehiculos = new List<Vehiculo>();
         empleados = new List<Empleado>();
         ordenesDeServicio = new List<OrdenServicio>();
-        facturas = new List<Factura>();
         numeroOrdenActual = 1;
         numeroFacturaActual = 1;
     }
@@ -126,7 +124,6 @@ public class Taller
         }
     }
 
-
     public void MostrarEmpleados()
     {
         Console.WriteLine("--------- Empleados ---------");
@@ -139,6 +136,49 @@ public class Taller
         Console.ReadKey();
     }
 
+    public Factura GenerarFactura()
+    {
+        Console.WriteLine("------------Factura-------------");
+        Console.Write("\nIngrese el nùmero de orden que quiere facturar: ");
+        int nroOrden = int.Parse(Console.ReadLine());
+
+        OrdenServicio orden = BuscarOrden(nroOrden);
+        List<ItemAprobacion> itemsAprobados = new List<ItemAprobacion>();
+            double subtotalRepuestos = 0;
+            foreach (var ordenApro in orden.OrdenesAprobacion)
+            {
+                foreach (var item in ordenApro.ItemsAprobacion)
+                {
+                    if (item.Estatus == "Aprobado")
+                    {
+                        subtotalRepuestos += item.ValorTotal;
+                        itemsAprobados.Add(item);
+                    }
+                }
+            }
+
+            double ManoObra = subtotalRepuestos * 0.10;
+            double subtotal = subtotalRepuestos + ManoObra;
+            double iva = subtotal * 0.19;
+            double total = subtotal + iva;
+
+            Factura factura = new Factura(nroOrden, numeroFacturaActual, orden.Cliente.Id, subtotal, iva,  ManoObra, total, itemsAprobados);
+            numeroFacturaActual++;
+
+            Console.WriteLine("------------------ Factura ---------------");
+            Console.WriteLine($"Nro Orden: {factura.NroOrden}\t\tNro Factura: {factura.NroFactura}\n\nId Cliente {factura.IdCliente}\n");
+            Console.WriteLine("------------------ Detalle Factura ---------------");
+            Console.WriteLine("Item\tRepuesto\t\tValorUnit\t\tCantidad\tSubtotal");
+            foreach (var item in factura.ItemsAprobados)
+            {
+                Console.WriteLine($"{item.Item}\t{item.Repuesto}\t\t\t{item.ValorUnitario}\t\t\t{item.Cantidad}\t{item.ValorTotal}");
+            }
+            Console.WriteLine($"\nSubtotal: {factura.Subtotal}\nIva: {factura.Iva}\nValor Mano de Obra: {factura.ManoObra}\nTotal a Pagar: {factura.Total}");
+
+            return factura;
+    }
+
+ 
 
 
 

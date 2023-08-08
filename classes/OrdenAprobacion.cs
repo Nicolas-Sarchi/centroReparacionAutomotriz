@@ -20,30 +20,6 @@ public class OrdenAprobacion
     {
         ItemsAprobacion.Add(item);
     }
-    public decimal CostototalRepuestos()
-    {
-        decimal costoTotal = 0;
-        foreach (var item in ItemsAprobacion)
-        {
-            if (item.Estatus == "Autorizado")
-            {
-                costoTotal += item.ValorTotal;
 
-            }
-        }
-        return costoTotal;
-    }
-    public List<ItemAprobacion> RepuestosAutorizados()
-    {
-        List<ItemAprobacion> autorizados = new List<ItemAprobacion>();
-        foreach (var item in ItemsAprobacion)
-        {
-            if (item.Estatus == "Autorizado")
-            {
-                autorizados.Add(item);
-            }
-        }
-        return autorizados;
-    }
 }
 
